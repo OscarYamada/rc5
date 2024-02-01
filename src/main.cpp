@@ -5,6 +5,7 @@
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // drive motors
+// middle is the bottom motormmmmmmmmrrrrmmmmm/
 pros::Motor lF(-12, pros::E_MOTOR_GEARSET_06); // left front motor. port 12, reversed
 pros::Motor lM(-11, pros::E_MOTOR_GEARSET_06); // left middle motor. port 11, reversed
 pros::Motor lB(-1, pros::E_MOTOR_GEARSET_06); // left back motor. port 1, reversed
@@ -166,7 +167,7 @@ void opcontrol() {
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
         // move the chassis with curvature drive
-        chassis.curvature(leftY, rightX);
+        chassis.tank(leftY, rightX);
         // delay to save resources
         pros::delay(10);
     }
