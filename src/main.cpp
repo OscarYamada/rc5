@@ -5,7 +5,7 @@
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // drive motors
-// middle is the bottom motor
+// middle is thxe bottom motor
 pros::Motor lF(-20, pros::E_MOTOR_GEAR_BLUE); // left front motor. port 12, reversed
 pros::Motor lM(-17, pros::E_MOTOR_GEAR_BLUE); // left middle motor. port 11, reversed
 pros::Motor lB(18, pros::E_MOTOR_GEAR_BLUE); // left back motor. p.ort 1, reversed
@@ -162,6 +162,8 @@ void autonomous() {
     pros::lcd::print(4, "pure pursuit finished!");
 
     //winpoint auton:
+
+    
     
 
 }
