@@ -5,26 +5,32 @@
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // drive motors
-// middle is the bottom motormmmmmmmmrrrrmmmmm/
-pros::Motor lF(-12, pros::E_MOTOR_GEARSET_06); // left front motor. port 12, reversed
-pros::Motor lM(-11, pros::E_MOTOR_GEARSET_06); // left middle motor. port 11, reversed
-pros::Motor lB(-1, pros::E_MOTOR_GEARSET_06); // left back motor. port 1, reversed
-pros::Motor rF(19, pros::E_MOTOR_GEARSET_06); // right front motor. port 2
-pros::Motor rM(20, pros::E_MOTOR_GEARSET_06); // right middle motor. port 11
-pros::Motor rB(9, pros::E_MOTOR_GEARSET_06); // right back motor. port 13
+// middle is the bottom motor
+pros::Motor lF(-20, pros::E_MOTOR_GEAR_BLUE); // left front motor. port 12, reversed
+pros::Motor lM(-17, pros::E_MOTOR_GEAR_BLUE); // left middle motor. port 11, reversed
+pros::Motor lB(18, pros::E_MOTOR_GEAR_BLUE); // left back motor. p.ort 1, reversed
+pros::Motor rF(11, pros::E_MOTOR_GEAR_BLUE); // right front motor. port 2
+pros::Motor rM(13, pros::E_MOTOR_GEAR_BLUE); // right middle motor. port 11
+pros::Motor rB(-12, pros::E_MOTOR_GEAR_BLUE); // right back motor. port 13
 
 // motor groups
 pros::MotorGroup leftMotors({lF, lM, lB}); // left motor group
-pros::MotorGroup rightMotors({rF, rM, rB}); // right motor group
+pros::MotorGroup rightMotors({	rF, rM, rB}); // right motor group
 
-// Inertial Sensor on port 2
-pros::Imu imu(2);
+// intake and cata motors
+pros::Motor cata(10, pros::E_MOTOR_GEAR_RED);
+pros::Motor intake(19, pros::E_MOTOR_GEAR_BLUE);
+
+// pneumatics
+
+// Inertial Sensor on port 21
+pros::Imu imu(21);
 
 // tracking wheels
-// horizontal tracking wheel encoder. Rotation sensor, port 15, reversed (negative signs don't work due to a pros bug)
-pros::Rotation horizontalEnc(15, true);
-// horizontal tracking wheel. 2.75" diameter, 3.7" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -3.7);
+// // horizontal tracking wheel encoder. Rotation sensor, port 15, reversed (negative signs don't work due to a pros bug)
+// pros::Rotation horizontalEnc(15, true);
+// // horizontal tracking wheel. 2.75" diameter, 3.7" offset, back of the robot (negative)
+// lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -3.7);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain
@@ -70,7 +76,7 @@ lemlib::ControllerSettings angularController
 lemlib::OdomSensors sensors(
 nullptr, // vertical tracking wheel 1, set to null
 nullptr, // vertical tracking wheel 2, set to nullptr as we are using IMEs
-&horizontal, // horizontal tracking wheel 1
+nullptr, // horizontal tracking wheel 1
 nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
 &imu // inertial sensor
 );
@@ -154,20 +160,43 @@ void autonomous() {
     // wait until the movement is done
     chassis.waitUntilDone();
     pros::lcd::print(4, "pure pursuit finished!");
+
+    //winpoint auton:
+    
+
 }
 
 /**
  * Runs in driver control
  */
+
 void opcontrol() {
+    bool toggleIntake = false;
     // controller
     // loop to continuously update motors
     while (true) {
         // get joystick positions
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
         // move the chassis with curvature drive
         chassis.tank(leftY, rightX);
+
+		// move the catapult
+		cata.move(127 * controller.get_digital(pros::E_CONTROLLER_DIGITAL_X));
+
+		// move the intake
+		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
+			intake.move(127);
+		}
+		else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+			intake.move(-127);
+		}
+		else{
+			intake.brake();
+		}
+		
+		//move the 
+
         // delay to save resources
         pros::delay(10);
     }

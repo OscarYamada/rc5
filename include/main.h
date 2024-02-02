@@ -75,6 +75,9 @@ void opcontrol(void);
 /**
  * You can add C++-only headers here
  */
+ #include "auton_farside.hpp"
+ #include "auton_nearside.hpp"
+ #include "auton_skills.hpp"
 //#include <iostream>
 #endif
 
