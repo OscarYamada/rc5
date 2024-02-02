@@ -60,7 +60,6 @@ void autonomous() {
 
     //far side auton, the one that has the goal on the same side
     // void FarSide();
-
 }
 
 /**
@@ -68,7 +67,8 @@ void autonomous() {
  */
 
 void opcontrol() {
-    bool toggleIntake = false;
+    bool toggleWings = false;
+    bool togglePTO = false;
     // controller
     // loop to continuously update motors
     while (true) {
@@ -99,6 +99,22 @@ void opcontrol() {
 		else{
 			intake.brake();
 		}
+
+        //shift wings
+        if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)){
+            toggleWings = !toggleWings;
+            leftBackWings.set_value(toggleWings);
+            rightBackWings.set_value(toggleWings);
+            pros::delay(200);
+        }
+
+        //shift pto
+        if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)){
+            togglePTO = !togglePTO;
+            leftBackWings.set_value(togglePTO);
+            rightBackWings.set_value(togglePTO);
+            pros::delay(200);
+        }
         
         // delay to save resources
         pros::delay(10);
