@@ -87,7 +87,6 @@ nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a secon
 // create the chassis
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors);
 
-
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -96,8 +95,13 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
  */
 void initialize() {
     pros::lcd::initialize(); // initialize brain screen
+    imu.tare();
     chassis.calibrate(); // calibrate sensors
     chassis.setPose(0,0,0);
+
+    cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    leftMotors.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
+    rightMotors.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
     
 
     // the default rate is 50. however, if you need to change the rate, you
@@ -129,7 +133,8 @@ void initialize() {
 /**
  * Runs while the robot is disabled
  */
-void disabled() {}
+void disabled() {
+}
 
 /**
  * runs after initialize if the robot is connected to field control
@@ -138,7 +143,7 @@ void competition_initialize() {}
 
 // get a path used for pure pursuit
 // this needs to be put outside a function
-ASSET(closeside1_txt); // '.' replaced with "_" to make c++ happy
+// ASSET(closeside1_txt); // '.' replaced with "_" to make c++ happy
 
 /**
  * Runs during auto
@@ -146,10 +151,60 @@ ASSET(closeside1_txt); // '.' replaced with "_" to make c++ happy
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    chassis.turnTo(chassis.getPose().x + 10, chassis.getPose().y + 10, 1000);
 
-    // chassis.follow(closeside1_txt, 2, 1000, true);
-    // chassis.follow(closeside1_txt, 2, 1000, false);
+    // far side auton
+    chassis.setPose(32, -54, 0);
+
+    // movement works
+    chassis.moveToPose(10, -16.5, 315, 3000);
+    intake.move(127);
+    chassis.waitUntilDone();
+    intake.brake();
+    chassis.turnTo(43, -20, 900);
+    chassis.waitUntilDone();
+    chassis.moveToPose(43, -20, 90, 1000);
+    intake.move(-127);
+    chassis.waitUntilDone();
+    intake.brake();
+
+    //movement test
+    // turn to L shape bottom triball and go
+    chassis.turnTo(11, -29, 1000);
+    chassis.waitUntilDone();
+    intake.move(127);
+    chassis.moveToPose(11, -29, 270, 3000);
+
+    // turn to preload
+    chassis.turnTo(38, -40, 1000);
+    chassis.waitUntilDone();
+    intake.move(-127);
+    chassis.moveToPoint(38, -40, 3000);
+
+    // turn bottom, and sweep
+    chassis.waitUntilDone();
+    intake.move(127);
+    chassis.turnTo(40, -50, 1000);
+    chassis.moveToPoint(40, -50, 3000);/
+    chassis.moveToPose(60, -30, 0, 4000);
+    chassis.waitUntil(10);
+    intake.move(-127);
+
+    leftMotors.move(-127);
+    rightMotors.move(-127);
+    pros::delay(200);
+
+    leftMotors.move(127);
+    rightMotors.move(127);
+    pros::delay(200);
+
+    
+
+
+    // // close side auton
+    // rightBackWings.set_value(true);
+    // pros::delay(100);
+    // rightMotors.move(127);
+    // pros::delay(1500);
 
 }
 
@@ -170,10 +225,10 @@ void opcontrol() {
         chassis.tank(leftY, rightX);
 
 		// move the catapult/lift
-		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
+		if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
 			cata.move(127);
 		}
-		else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)){
+		else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
 			cata.move(-127);
 		}
 		else{
@@ -186,24 +241,24 @@ void opcontrol() {
 		}
 		else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
 			intake.move(-127);
-		}
+        }
 		else{
 			intake.brake();
-		}
+		}   
 
         //shift wings
-        if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)){
+        if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
             toggleWings = !toggleWings;
             leftBackWings.set_value(toggleWings);
             rightBackWings.set_value(toggleWings);
-            pros::delay(200);
+            pros::delay(500);
         }
 
         //shift pto
-        if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)){
+        if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)){
             togglePTO = !togglePTO;
             pto.set_value(togglePTO);
-            pros::delay(200);
+            pros::delay(500);
         }
         
         // delay to save resources
