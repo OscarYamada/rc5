@@ -15,7 +15,7 @@ pros::Motor rB(-12, pros::E_MOTOR_GEAR_BLUE); // right back motor. port 13
 
 // motor groups
 pros::MotorGroup leftMotors({lF, lM, lB}); // left motor group
-pros::MotorGroup rightMotors({	rF, rM, rB}); // right motor group
+pros::MotorGroup rightMotors({rF, rM, rB}); // right motor group
 
 // intake and cata motors
 pros::Motor cata(10, pros::E_MOTOR_GEAR_RED); // cata motor, port 10
@@ -46,32 +46,30 @@ lemlib::Omniwheel::NEW_325, // using new 3.25" omnis
 8 // chase power is 2. If we had traction wheels, it would have been 8
 );
 
+// just remember kP + 2, then kD + 5 until its accurate then repeat
 // lateral motion controller
-lemlib::ControllerSettings linearController
-(
-10, // proportional gain (kP)
-0, // integral gain (kI)
-3, // derivative gain (kD)
-3, // anti windup
-1, // small error range, in inches
-100, // small error range timeout, in milliseconds
-3, // large error range, in inches
-500, // large error range timeout, in milliseconds
-20 // maximum acceleration (slew)
+// lateral motion controller
+lemlib::ControllerSettings linearController(10, // proportional gain (kP)
+                                            0.1, // integral gain (kI)
+                                            10, // derivative gain (kD)
+                                            3, // anti windup
+                                            1, // small error range, in inches
+                                            100, // small error range timeout, in milliseconds
+                                            3, // large error range, in inches
+                                            500, // large error range timeout, in milliseconds
+                                            20 // maximum acceleration (slew)
 );
 
 // angular motion controller
-lemlib::ControllerSettings angularController
-(
-2, // proportional gain (kP)
-0, // integral gain (kI)
-10, // derivative gain (kD)
-3, // anti windup
-1, // small error range, in degrees
-100, // small error range timeout, in milliseconds
-3, // large error range, in degrees
-500, // large error range timeout, in milliseconds
-0 // maximum acceleration (slew)
+lemlib::ControllerSettings angularController(10, // proportional gain (kP)
+                                             0.1, // integral gain (kI)
+                                             55, // derivative gain (kD)
+                                             3, // anti windup
+                                             1, // small error range, in degrees
+                                             100, // small error range timeout, in milliseconds
+                                             3, // large error range, in degrees
+                                             500, // large error range timeout, in milliseconds
+                                             0 // maximum acceleration (slew)
 );
 
 // sensors for odometry
@@ -156,48 +154,44 @@ void autonomous() {
     chassis.setPose(32, -54, 0);
 
     // movement works
-    chassis.moveToPose(10, -16.5, 315, 3000);
+    chassis.moveToPose(10, -16.5, 315, 1900);
     intake.move(127);
     chassis.waitUntilDone();
     intake.brake();
-    chassis.turnTo(43, -20, 900);
+    chassis.turnTo(43, -20, 600);
     chassis.waitUntilDone();
-    chassis.moveToPose(43, -20, 90, 1000);
+    chassis.moveToPose(43, -20, 90, 1500);
     intake.move(-127);
-    chassis.waitUntilDone();
-    intake.brake();
 
     //movement test
     // turn to L shape bottom triball and go
-    chassis.turnTo(11, -29, 1000);
+    chassis.turnTo(11, -31, 800);
     chassis.waitUntilDone();
     intake.move(127);
-    chassis.moveToPose(11, -29, 270, 3000);
+    chassis.moveToPose(11, -31, 225, 2300);
 
     // turn to preload
-    chassis.turnTo(38, -40, 1000);
-    chassis.waitUntilDone();
-    intake.move(-127);
-    chassis.moveToPoint(38, -40, 3000);
-
-    // turn bottom, and sweep
-    chassis.waitUntilDone();
-    intake.move(127);
-    chassis.turnTo(40, -50, 1000);
-    chassis.moveToPoint(40, -50, 3000);/
-    chassis.moveToPose(60, -30, 0, 4000);
+    chassis.turnTo(38, -33, 700);
+    chassis.moveToPose(38, -33, 90, 1000);
     chassis.waitUntil(10);
     intake.move(-127);
 
-    leftMotors.move(-127);
-    rightMotors.move(-127);
-    pros::delay(200);
+    // turn bottom, and sweep
+    chassis.moveToPose(30, -52, 270, 800);
+    chassis.waitUntilDone();
+    intake.move(127);
+    chassis.moveToPose(13, -52, 270, 3000);
 
-    leftMotors.move(127);
-    rightMotors.move(127);
-    pros::delay(200);
+    chassis.moveToPose(25, -52, 270, 1000, {.forwards = false});\
+    chassis.turnTo(40, -52, 1000);
+    chassis.waitUntilDone();
+    intake.move(-127);
+    chassis.moveToPose(60, -20, 0, 2000);
 
-    
+    chassis.moveToPose(60, -40, 180, 1000, {.forwards = false});
+    chassis.turnTo(60, -20, 1000);
+    chassis.moveToPose(60, -20, 0, 1000);    
+
 
 
     // // close side auton
