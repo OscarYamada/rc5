@@ -168,15 +168,15 @@ void SkillsAuton(){
     // pros::delay(30000);
 
     //go to corner middle triball red side, on the way/in the middle
-    chassis.moveToPose(-35, -20, 90, 1500, {.forwards = false});
+    chassis.moveToPose(-35, -17, 90, 1500, {.forwards = false});
 
     //go to corner middle triball red side, in the corner
-    chassis.moveToPose(-14, -20, 90, 9000, {.forwards = false});
+    chassis.moveToPose(-16, -17, 90, 9000, {.forwards = false});
     chassis.waitUntil(35);
     backWings.set_value(true);
 
     //move across middle beam, matchloading side
-    chassis.moveToPose(-14, 46, 0, 9000, {.forwards = false});
+    chassis.moveToPose(-16, 46, 0, 9000, {.forwards = false});
 
     //chassis go to in front of the blue hang, at matchload side
     chassis.moveToPose(-40, 52, 90, 9000, {.forwards = false});
@@ -205,8 +205,8 @@ void initialize() {
     chassis.setPose(0,0,0);
 
     cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-    leftMotors.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
-    rightMotors.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
+    leftMotors.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
+    rightMotors.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
     
 
     // the default rate is 50. however, if you need to change the rate, you
