@@ -62,6 +62,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+void PIDTest(void);
+void FarSideAuton(void);
+void CloseSideAuton(void);
+void SkillsAuton(void);
 void autonomous(void);
 void initialize(void);
 void disabled(void);
