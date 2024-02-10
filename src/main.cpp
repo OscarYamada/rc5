@@ -101,6 +101,7 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
     chassis.moveToPose(0, -10, 180, 5000);
  }
 
+
  void FarSideAuton(){
     // far side auton
 
@@ -112,11 +113,13 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
     intake.brake();
     chassis.turnTo(43, -20, 700);
     chassis.waitUntilDone();
+    frontWings.set_value(true);
     chassis.moveToPose(43, -20, 90, 1300);
     intake.move(-127);
 
     // turn to L shape bottom triball and go
     chassis.waitUntilDone();
+    frontWings.set_value(false);
     intake.move(127);
     chassis.moveToPose(11, -31, 225, 1500);
 
@@ -145,6 +148,7 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
     chassis.moveToPose(60, -15, 180, 1000, {.forwards = false});
  }
 
+
  void CloseSideAuton(){
     // close side auton
     backWings.set_value(true);
@@ -153,33 +157,40 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
     pros::delay(1500);
  }
 
+
 void SkillsAuton(){
     // skills:
     // go into net
-    chassis.setPose(-46.74323, -49.84659, -17.973);
+    chassis.setPose(-37, -57, -45);
     intake.move(-127);
-    chassis.moveToPose(-60,-22,0, 800, {.lead = 0.1});
+    chassis.moveToPose(-60,-22, 0, 1400, {.lead = 0.2});
 
     // go to cata launch, and launch cata 30s
-    chassis.moveToPose(-60, -45.5, 60, 1500, {.forwards = false});
+    chassis.moveToPose(-64, -42.2, 65, 9000, {.forwards = false});
+
+    // launch the cata
     chassis.waitUntilDone();
     intake.brake();
+
     // cata.move(127);
     // pros::delay(30000);
+    pros::delay(100);
 
     //go to corner middle triball red side, on the way/in the middle
-    chassis.moveToPose(-35, -17, 90, 1500, {.forwards = false});
+    chassis.waitUntilDone();
+    cata.brake();
+    chassis.moveToPose(-35, -19, 90, 1400, {.forwards = false});
 
     //go to corner middle triball red side, in the corner
-    chassis.moveToPose(-16, -17, 90, 9000, {.forwards = false});
+    chassis.moveToPose(-15, -20, 90, 1200, {.forwards = false});
     chassis.waitUntil(35);
     backWings.set_value(true);
 
     //move across middle beam, matchloading side
-    chassis.moveToPose(-16, 46, 0, 9000, {.forwards = false});
+    chassis.moveToPose(-15, 38, 0, 2000, {.forwards = false});
 
     //chassis go to in front of the blue hang, at matchload side
-    chassis.moveToPose(-40, 52, 90, 9000, {.forwards = false});
+    chassis.moveToPose(-60, 23, 90, 1300, {.forwards = false});
     chassis.waitUntil(10);
     backWings.set_value(false);
     frontWings.set_value(true);
@@ -187,7 +198,32 @@ void SkillsAuton(){
     //chassis go under blue bar, pushing all triballs with wings out
     chassis.waitUntilDone();
     frontWings.set_value(false); // set front wings out
-    chassis.moveToPose(0, 65, 90, 9000);
+    chassis.moveToPose(-15, 58, 90, 2000);
+
+    //chassis go on way to push to the side
+    chassis.waitUntilDone();
+    intake.move(-127);
+    chassis.moveToPose(40, 58, 90, 3000);
+
+    //chassis go push to side and then go back
+    chassis.moveToPose(60, 14, 180, 1000,{.lead = 0.2});
+    chassis.moveToPose(60, 16, 180, 1000, {.forwards = false});
+
+    //chassis turn to corner triballs at red side blue hang
+    chassis.moveToPose(21, 27, -90, 3000, {.forwards = false});
+
+    //chassis turn to middle
+    chassis.moveToPose(43,15,130,3000,{.forwards = false});
+
+    //chassis back up for second push in middle (chassis go to middle with back fwd)
+    chassis.moveToPose(25,15,100,1000, {.forwards = false});
+
+    //chassis 2nd push in middle
+    chassis.moveToPose(43,-7,90,2000,{.forwards = false});
+
+
+
+
 }
 
 
@@ -256,9 +292,9 @@ void competition_initialize() {}
  */
 void autonomous() {
     // PIDTune();
-    // FarSideAuton();
-    // CloseSideAuton();
-    SkillsAuton();
+    FarSideAuton(); //this is the one that scores in the net, the 5 ball
+    // CloseSideAuton(); //this is the one that doesn't score, the winpoint.
+    // SkillsAuton();
 }
 
 /**
