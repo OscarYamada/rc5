@@ -107,21 +107,21 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
 
     chassis.setPose(32, -54, 0);
 
-    chassis.moveToPose(10, -16.5, 315, 2000);
+    chassis.moveToPose(10, -6, 310, 2000);
     intake.move(127);
     chassis.waitUntilDone();
     intake.brake();
-    chassis.turnTo(43, -20, 700);
+    chassis.turnTo(45, -6, 700);
     chassis.waitUntilDone();
     frontWings.set_value(true);
-    chassis.moveToPose(43, -20, 90, 1300);
+    chassis.moveToPose(45, -6, 90, 1300);
     intake.move(-127);
 
     // turn to L shape bottom triball and go
     chassis.waitUntilDone();
     frontWings.set_value(false);
     intake.move(127);
-    chassis.moveToPose(11, -31, 225, 1500);
+    chassis.moveToPose(8, -29, 225, 1500);
 
     // turn to preload
     chassis.moveToPose(40, -40, 135, 800);
@@ -129,23 +129,23 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
     intake.move(-127);
 
     // turn preload/bottom, and sweep
-    chassis.moveToPose(28, -53, 270, 900);
+    chassis.moveToPose(39, -53, 270, 900);
+
     chassis.waitUntilDone();
     intake.move(127);
-    chassis.turnTo(15, -53, 800);
-    chassis.moveToPose(15, -53, 270, 2000);
+    chassis.turnTo(12, -57, 800);
+    chassis.moveToPose(12, -57, 270, 2000);
 
     // go backwards to preload
-    chassis.moveToPose(25, -53, 270, 1000, {.forwards = false});
-    chassis.turnTo(40, -53, 1000);
+    chassis.moveToPose(25, -57, 270, 1000, {.forwards = false});
+    chassis.turnTo(40, -57, 1000);
     chassis.waitUntilDone();
     intake.move(-127);
-    chassis.moveToPose(55, -53, 90, 1000);
-    chassis.moveToPose(60, -20, 0, 2000);
+    chassis.moveToPose(55, -57, 90, 1000);
+    chassis.moveToPose(61, -20, 0, 2000);
 
-    chassis.moveToPose(60, -40, 180, 1000, {.forwards = false});
-    chassis.turnTo(60, -20, 1000);
-    chassis.moveToPose(60, -15, 180, 1000, {.forwards = false});
+    chassis.moveToPose(65, -40, 180, 1000, {.forwards = false});
+    chassis.moveToPose(65, -15, 0, 1000, {.forwards = false});
  }
 
 
