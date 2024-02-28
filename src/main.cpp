@@ -2,33 +2,35 @@
 #include "lemlib/api.hpp"
 
 // controller
-pros::Controller controller(pros::E_CONTROLLER_MASTER);
+pros::Controller controller(pros::E_CONTROLLER_MASTER); // controller, name: controller
 
 // drive motors
 // middle is the bottom motor, back is the top motor
 pros::Motor lF(-1, pros::E_MOTOR_GEAR_BLUE); // left front motor. port 12, reversed
-pros::Motor lM(-11, pros::E_MOTOR_GEAR_BLUE); // left middle motor. port 11, reversed
-pros::Motor lB(12, pros::E_MOTOR_GEAR_BLUE); // left back motor. port 1, reversed
+pros::Motor lM(2, pros::E_MOTOR_GEAR_BLUE); // left middle motor. port 11, reversed
+pros::Motor lB(-3, pros::E_MOTOR_GEAR_BLUE); // left back motor. port 1, reversed
 pros::Motor rF(10, pros::E_MOTOR_GEAR_BLUE); // right front motor. port 2
-pros::Motor rM(20, pros::E_MOTOR_GEAR_BLUE); // right middle motor. port 11
-pros::Motor rB(-19, pros::E_MOTOR_GEAR_BLUE); // right back motor. port 13
+pros::Motor rM(-9, pros::E_MOTOR_GEAR_BLUE); // right middle motor. port 11
+pros::Motor rB(8, pros::E_MOTOR_GEAR_BLUE); // right back motor. port 13
 
 // motor groups
 pros::MotorGroup leftMotors({lF, lM, lB}); // left motor group
 pros::MotorGroup rightMotors({rF, rM, rB}); // right motor group
 
 // intake and cata motors
-pros::Motor cata(13, pros::E_MOTOR_GEAR_RED); // cata motor, port 10
-pros::Motor intake(2, pros::E_MOTOR_GEAR_BLUE); // intake motor, port 19
+pros::Motor cata(4, pros::E_MOTOR_GEAR_RED); // cata motor, port 10
+pros::Motor intake(5, pros::E_MOTOR_GEAR_BLUE); // intake motor, port 19
 
 // pneumatics
 pros::ADIDigitalOut pto('C'); // PTO pneumatic, port C
-pros::ADIDigitalOut backWings('A'); // PTO pneumatic, port A
-pros::ADIDigitalOut frontWings('G'); // PTO pneumatic, port G
-pros::ADIDigitalOut ratchet('F'); // PTO pneumatic, port F
+pros::ADIDigitalOut backWingsL('B'); // PTO pneumatic, port A
+pros::ADIDigitalOut backWingsR('E'); // PTO pneumatic, port B
+pros::ADIDigitalOut frontWingsL('A'); // PTO pneumatic, port G
+pros::ADIDigitalOut frontWingsR('F'); // PTO pneumatic, port E
+pros::ADIDigitalOut ratchet('D'); // PTO pneumatic, port F
 
 // Inertial Sensor on port 18
-pros::Imu imu(18);
+pros::Imu imu(11);
 
 // tracking wheels
 // // horizontal tracking wheel encoder. Rotation sensor, port 15, reversed (negative signs don't work due to a pros bug)
@@ -50,26 +52,26 @@ lemlib::Omniwheel::NEW_325, // using new 3.25" omnis
 // just remember kP + 2, then kD + 5 until its accurate then repeat
 // lateral motion controller
 // lateral motion controller
-lemlib::ControllerSettings linearController(18, // proportional gain (kP)
+lemlib::ControllerSettings linearController(18, // proportional gain (kP) 24
                                             0, // integral gain (kI)
-                                            30, // derivative gain (kD)
+                                            15, // derivative gain (kD) 20
                                              3, // anti windup
                                              1, // small error range, in degrees
-                                             10, // small error range timeout, in milliseconds
+                                             75, // small error range timeout, in milliseconds
                                              3, // large error range, in degrees
-                                             300, // large error range timeout, in milliseconds
+                                             200, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 );
 
 // angular motion controller
-lemlib::ControllerSettings angularController(10, // proportional gain (kP)
+lemlib::ControllerSettings angularController(4, // proportional gain (kP)
                                             0, // integral gain (kI)
-                                            55, // derivative gain (kD)
+                                            25, // derivative gain (kD)
                                              3, // anti windup
                                              1, // small error range, in degrees
-                                             10, // small error range timeout, in milliseconds
+                                             75, // small error range timeout, in milliseconds
                                              3, // large error range, in degrees
-                                             300, // large error range timeout, in milliseconds
+                                             200, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 
 );
@@ -96,74 +98,113 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
  */
 
  void PIDTune(){
+    // first cycle
     chassis.setPose(0, 0, 0);
-    chassis.turnTo(0, -10, 5000);
-    chassis.moveToPose(0, -10, 180, 5000);
+    chassis.turnTo(0, -30, 9000);
+    chassis.moveToPose(0, -30, 180, 9000);
+
+    // 2nd cycle
+    chassis.waitUntilDone();
+    chassis.setPose(0, 0, 0);
+    chassis.turnTo(0, -30, 9000);
+    chassis.moveToPose(0, -30, 180, 9000);
  }
 
 
  void FarSideAuton(){
     // far side auton
-
     chassis.setPose(32, -54, 0);
 
     // move to the middle triball (eg. triball in the middle of the field, on our side)
-    chassis.moveToPose(10, -5, 305, 2000);
-    frontWings.set_value(true);
+    frontWingsR.set_value(true);
     intake.move(127);
-    chassis.waitUntil(3);
-    frontWings.set_value(false);
+    chassis.moveToPose(6, -3, 305, 3000);
 
+    // front wings in
+    chassis.waitUntil(10);
+    frontWingsR.set_value(false);
+
+    // stop intake
     chassis.waitUntilDone();
     intake.brake();
 
-    // go score 2 of the triballs
-    chassis.waitUntil(4);
-    frontWings.set_value(true);
-    chassis.moveToPose(45, -5, 90, 1300);
+    // front wings out
+    chassis.waitUntil(2);
+    frontWingsL.set_value(true);
+    frontWingsR.set_value(true);
+
+    //score in net, 2 triballs, up in middle
+    chassis.moveToPose(45, -3, 90, 3000);
     intake.move(-127);
 
-    // turn to bottom middle triball and go
+    // front wings in
     chassis.waitUntilDone();
-    frontWings.set_value(false);
+    frontWingsL.set_value(false);
+    frontWingsR.set_value(false);
+
+    // go to bottom middle triball
     intake.move(127);
-    chassis.moveToPose(7, -23, 230, 1000);
+    chassis.moveToPose(8, -20, 230, 3000);
 
     // go to bottom
-    chassis.moveToPose(42, -45, 135, 1000);
+    chassis.moveToPose(42, -42, 135, 3000);
+
+    // intake out the triball in middle
     chassis.waitUntil(8);
     intake.move(-127);
 
-    // sweep below hang
-    chassis.moveToPose(43, -54, 270, 1000);
+    // intake in the bottom triball from the bottom, but not under bar.
     chassis.waitUntilDone();
     intake.move(127);
-    chassis.turnTo(12, -57, 800);
-    chassis.moveToPose(12, -57, 270, 2000);
 
-    // go backwards a bit and then turn 180 degrees
-    chassis.moveToPose(25, -57, 270, 1000, {.forwards = false});
-    chassis.turnTo(40, -57, 600);
+    // go under bar
+    chassis.moveToPose(7, -52, 270, 2000);
+
+    // go backwards a bit 
+    chassis.moveToPose(35, -53, 270, 1000, {.forwards = false});
+
+    // turn 180 degrees, and intake out after
+    chassis.turnTo(40, -53, 600);
     chassis.waitUntilDone();
     intake.move(-127);
 
     // go curve to the goal
-    chassis.moveToPose(55, -57, 90, 1000);
-    chassis.moveToPose(64, -20, 0, 2000);
+    chassis.moveToPose(46, -53, 90, 9000);
 
-    chassis.moveToPose(66, -38, 340, 1000, {.forwards = false});
-    chassis.moveToPose(66, -15, 0, 1000, {.forwards = false});
+    // go curve to matchload out position
+    chassis.moveToPose(52, -40, 45, 9000);
+
+    // get matchload out
+    chassis.turnTo(52, -30, 9000);
+    backWingsR.set_value(true);
+
+    // turn back to get the triballs in range to score
+    chassis.turnTo(54, -35, 9000, false);
+
+    // score the 2-3 triballs in
+    chassis.moveToPose(54, -18, 0, 9000, {.forwards = false});
+
+    // go score
+    // chassis.moveToPose(64, -20, 0, 2000);
+
+    // // go back a bit
+    // chassis.moveToPose(66, -50, 340, 1000, {.forwards = false});
+
+    // // score again
+    // chassis.moveToPose(66, -20, 0, 1000, {.forwards = false});
  }
 
 
  void CloseSideAuton(){
     // close side auton
     chassis.setPose(50, 55, -45);
-    backWings.set_value(true);
+    backWingsL.set_value(true);
+    backWingsR.set_value(true);
     pros::delay(100);
     rightMotors.move(127);
     pros::delay(1500);
-    backWings.set_value(false);
+    backWingsL.set_value(false);
+    backWingsR.set_value(false);
     pros::delay(1000);
     chassis.turnTo(60, 22, 2000, false);
     chassis.moveToPose(60, 22, 0, 2000, {.forwards = false});
@@ -210,76 +251,92 @@ void SkillsAuton(){
     chassis.moveToPose(-56, -27, 0, 1400, {.lead = 0.2});
 
     // go to cata launch, and launch cata 30s
-    chassis.moveToPose(-64.5, -44.2, 65, 3000, {.forwards = false});
+    chassis.moveToPose(-64.5, -44.2, 70, 1000, {.forwards = false});
 
     // launch the cata
     chassis.waitUntilDone();
     intake.brake();
-
     pros::millis();
     leftMotors.move(-1);
     rightMotors.move(-1);
-    // cata.move(127);
-    pros::delay(3000);
+    cata.move(127);
+    pros::delay(30000);
 
     //go to corner middle triball red side, on the way/in the middle
-    // cata.brake();
+    cata.brake();
+    chassis.moveToPose(-60, -40, 65, 300);
     chassis.moveToPose(-35, -28, 90, 1200, {.forwards = false});
 
     //go to corner middle triball red side, in the corner
     chassis.moveToPose(-15.5, -30, 90, 1100, {.forwards = false});
     chassis.waitUntil(35);
-    backWings.set_value(true);
+    backWingsL.set_value(true);
+    backWingsR.set_value(true);
 
     //midpoint at the middle bar
-    chassis.moveToPose(-15.5, 20, 0, 1300, {.forwards = false});
+    chassis.moveToPose(-16, 25, 0, 1500, {.forwards = false});
     //move across middle bar
-    chassis.moveToPose(-15.5, 43, 0, 1200, {.forwards = false, .maxSpeed = 70});
+    chassis.moveToPose(-16, 43, 0, 1450, {.forwards = false, .maxSpeed = 70});
 
     //chassis go to in front of the blue hang, at matchload side
     
-    chassis.moveToPose(-60, 38, 90, 2000, {.forwards = false});
+    chassis.moveToPose(-60, 38, 90, 1700, {.forwards = false});
     chassis.waitUntil(10);
-    backWings.set_value(false);
+    backWingsL.set_value(false);
+    backWingsR.set_value(false);
 
     //chassis go under blue bar, pushing all triballs
     chassis.waitUntilDone();
-    chassis.moveToPose(-25, 58, 270, 1600, {.forwards = false});
+    chassis.moveToPose(-25, 60, 270, 1600, {.forwards = false});
 
     //chassis go on way to push to the side
     chassis.waitUntilDone();
     intake.move(-127);
-    chassis.moveToPose(53, 58, 270, 1500,{.forwards = false});
+    chassis.moveToPose(53, 59, 270, 1450,{.forwards = false});
 
     //chassis go push to side and then go back
-    chassis.moveToPose(60, 40, 135, 700,{.forwards = false, .lead = 0.2 });
+    chassis.moveToPose(60, 40, 135, 750,{.forwards = false});
     chassis.moveToPose(60, 24, 180, 700,{.forwards = false, .lead = 0.2 });
 
     //chassis go up a bit, so there's enough space to turn to not get stuck under the goal
-    chassis.moveToPose(63, 26, 0, 1000);
+    chassis.moveToPose(60, 35, 0, 600);
     // ends up at the goal side
 
     //chassis turn to corner triballs at red side blue hang
-    chassis.moveToPose(21, 27, -90, 3000, {.forwards = false});
+    chassis.moveToPose(10, 27, 180, 3000);
     chassis.waitUntil(10);
-    backWings.set_value(true);
+    frontWingsL.set_value(true);
     intake.brake();
 
+    //chassis go a bit to the middle for grouping
+    chassis.moveToPose(12, 3, 180, 3000);
+    frontWingsR.set_value(true);
+
     //chassis score middle
-    chassis.moveToPose(43,0,130,5000,{.forwards = false});
+    chassis.moveToPose(34, 1, -90,5000);
 
     //chassis back up for second push in middle (chassis go to middle with back fwd)
     chassis.waitUntilDone();
-    backWings.set_value(false);
-    chassis.moveToPose(25,5,100,5000, {.forwards = false});
+    frontWingsL.set_value(false);
+    frontWingsR.set_value(false);
+    backWingsL.set_value(true);
+    chassis.moveToPose(10,5,100,5000, {.forwards = false});
 
     //chassis to down from score side
-    chassis.moveToPose(25, -35, 180, 5000, {.forwards = false});
-    chassis.waitUntil(4);
-    backWings.set_value(true);
+    chassis.moveToPose(10, -29, 180, 5000, {.forwards = false});
+    backWingsR.set_value(true);
+
+    //chassis swing turn (at least as close as i cam get it) to push all the triballs (tommy skills)
+    chassis.waitUntilDone();
+    pros::millis();
+    leftMotors.move(-127);
+    pros::delay(700);
 
     //chassis score 2nd time middle
-    chassis.moveToPose(43, -5, -115, 5000, {.forwards = false});
+    chassis.moveToPose(34, -2, -90, 5000, {.forwards = false});
+
+    //chassis move up a bit
+    chassis.moveToPose(10, -2, -90, 5000);
 }
 
 
@@ -348,9 +405,9 @@ void competition_initialize() {}
  */
 void autonomous() {
     // PIDTune();
-    // FarSideAuton(); //this is the one that scores in the net, the 5 ball
+    FarSideAuton(); //this is the one that scores in the net, the 5 ball
     // CloseSideAuton(); //this is the one that doesn't score, the winpoint.
-    SkillsAuton();
+    // SkillsAuton();
 }
 
 /**
@@ -396,14 +453,16 @@ void opcontrol() {
         //shift back wings
         if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
             toggleBackWings = !toggleBackWings;
-            backWings.set_value(toggleBackWings);
+            backWingsL.set_value(toggleBackWings);
+            backWingsR.set_value(toggleBackWings);
             pros::delay(500);
         }
 
         //shift wings
         if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)){
             toggleFrontWings = !toggleFrontWings;
-            frontWings.set_value(toggleFrontWings);
+            frontWingsL.set_value(toggleFrontWings);
+            frontWingsR.set_value(toggleFrontWings);
             pros::delay(500);
         }
 
