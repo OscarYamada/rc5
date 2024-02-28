@@ -172,17 +172,17 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
     chassis.moveToPose(46, -53, 90, 9000);
 
     // go curve to matchload out position
-    chassis.moveToPose(52, -40, 45, 9000);
+    chassis.moveToPose(63, -40, 45, 9000);
 
     // get matchload out
-    chassis.turnTo(52, -30, 9000);
+    chassis.turnTo(63, -30, 9000);
     backWingsR.set_value(true);
 
     // turn back to get the triballs in range to score
-    chassis.turnTo(54, -35, 9000, false);
+    chassis.turnTo(68, -35, 9000, false);
 
     // score the 2-3 triballs in
-    chassis.moveToPose(54, -18, 0, 9000, {.forwards = false});
+    chassis.moveToPose(66, -20, 0, 9000, {.forwards = false});
 
     // go score
     // chassis.moveToPose(64, -20, 0, 2000);
