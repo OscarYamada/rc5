@@ -52,7 +52,7 @@ lemlib::Omniwheel::NEW_325, // using new 3.25" omnis
 // just remember kP + 2, then kD + 5 until its accurate then repeat
 // lateral motion controller
 // lateral motion controller
-lemlib::ControllerSettings linearController(18, // proportional gain (kP) 24
+lemlib::ControllerSettings linearController(16, // proportional gain (kP) 24
                                             0, // integral gain (kI)
                                             15, // derivative gain (kD) 20
                                              3, // anti windup
@@ -251,92 +251,107 @@ void SkillsAuton(){
     chassis.moveToPose(-56, -27, 0, 1400, {.lead = 0.2});
 
     // go to cata launch, and launch cata 30s
-    chassis.moveToPose(-64.5, -44.2, 70, 1000, {.forwards = false});
+    chassis.moveToPose(-65, -44, 70, 1000, {.forwards = false});
 
     // launch the cata
     chassis.waitUntilDone();
+    // cata.move(127);
     intake.brake();
     pros::millis();
     leftMotors.move(-1);
     rightMotors.move(-1);
-    cata.move(127);
-    pros::delay(30000);
+    pros::delay(3000);
 
     //go to corner middle triball red side, on the way/in the middle
     cata.brake();
-    chassis.moveToPose(-60, -40, 65, 300);
-    chassis.moveToPose(-35, -28, 90, 1200, {.forwards = false});
+    chassis.moveToPose(-60, -30, 65, 300);
+    chassis.moveToPose(-35, -37, 90, 800, {.forwards = false});
+
+    //disable the cata arm from holding
+    pros::millis();
+    // cata.move(127);
+    pros::delay(300);
+    cata.brake();
+    pros::millis();
 
     //go to corner middle triball red side, in the corner
-    chassis.moveToPose(-15.5, -30, 90, 1100, {.forwards = false});
-    chassis.waitUntil(35);
+    chassis.moveToPose(-7, -42, 90, 1200, {.forwards = false});
+
+    //move across middle bar
+    chassis.moveToPose(-7.4, 49, 0, 2800, {.forwards = false});
+    cata.brake();
     backWingsL.set_value(true);
     backWingsR.set_value(true);
 
-    //midpoint at the middle bar
-    chassis.moveToPose(-16, 25, 0, 1500, {.forwards = false});
-    //move across middle bar
-    chassis.moveToPose(-16, 43, 0, 1450, {.forwards = false, .maxSpeed = 70});
-
     //chassis go to in front of the blue hang, at matchload side
-    
-    chassis.moveToPose(-60, 38, 90, 1700, {.forwards = false});
-    chassis.waitUntil(10);
+    chassis.moveToPose(-50, 49, 90, 1800);
     backWingsL.set_value(false);
     backWingsR.set_value(false);
 
-    //chassis go under blue bar, pushing all triballs
+    //chassis go right before blue hang
     chassis.waitUntilDone();
-    chassis.moveToPose(-25, 60, 270, 1600, {.forwards = false});
+    chassis.moveToPose(-30, 60, 270, 800);
 
-    //chassis go on way to push to the side
+    //chassis go under blue hang to other side
     chassis.waitUntilDone();
     intake.move(-127);
-    chassis.moveToPose(53, 59, 270, 1450,{.forwards = false});
-
-    //chassis go push to side and then go back
-    chassis.moveToPose(60, 40, 135, 750,{.forwards = false});
-    chassis.moveToPose(60, 24, 180, 700,{.forwards = false, .lead = 0.2 });
-
-    //chassis go up a bit, so there's enough space to turn to not get stuck under the goal
-    chassis.moveToPose(60, 35, 0, 600);
-    // ends up at the goal side
-
-    //chassis turn to corner triballs at red side blue hang
-    chassis.moveToPose(10, 27, 180, 3000);
-    chassis.waitUntil(10);
+    chassis.moveToPose(43, 65, 270, 2000);
     frontWingsL.set_value(true);
-    intake.brake();
-
-    //chassis go a bit to the middle for grouping
-    chassis.moveToPose(12, 3, 180, 3000);
     frontWingsR.set_value(true);
 
+    //chassis 45 degrees to score
+    chassis.moveToPose(54, 54, 180, 600);
+
+    //chassis score
+    chassis.moveToPose(63, 27, 180, 1500);
+    chassis.moveToPose(63, 50, 180, 1000, {.forwards = false});
+    chassis.moveToPose(63, 27, 0, 1400, {.forwards = false});
+    chassis.moveToPose(63, 40, 0, 500);
+
+    //chassis turn to corner triballs at red side blue hang
+    chassis.moveToPose(-8.5, 33, -90, 2000);
+    chassis.waitUntil(10);
+    intake.move(127);
+    frontWingsR.set_value(true);
+    intake.brake();
+
+    //chassis sweep some middle balls (in order not to get stuck when going back)
+    chassis.moveToPose(-8.5, 16, 0, 3000);
+
     //chassis score middle
-    chassis.moveToPose(34, 1, -90,5000);
+    chassis.waitUntilDone();
+    intake.move(-127);
+    frontWingsL.set_value(true);
+    chassis.moveToPose(42, 0, 90,5000);
 
     //chassis back up for second push in middle (chassis go to middle with back fwd)
     chassis.waitUntilDone();
     frontWingsL.set_value(false);
     frontWingsR.set_value(false);
     backWingsL.set_value(true);
-    chassis.moveToPose(10,5,100,5000, {.forwards = false});
+    chassis.moveToPose(-8, 16,100,5000, {.forwards = false});
 
     //chassis to down from score side
-    chassis.moveToPose(10, -29, 180, 5000, {.forwards = false});
+    chassis.moveToPose(-9, -12, 180, 1000, {.forwards = false});
     backWingsR.set_value(true);
 
     //chassis swing turn (at least as close as i cam get it) to push all the triballs (tommy skills)
     chassis.waitUntilDone();
     pros::millis();
     leftMotors.move(-127);
-    pros::delay(700);
+    pros::delay(540);
 
     //chassis score 2nd time middle
-    chassis.moveToPose(34, -2, -90, 5000, {.forwards = false});
+    chassis.moveToPose(34, 0, -90, 5000, {.forwards = false});
 
     //chassis move up a bit
-    chassis.moveToPose(10, -2, -90, 5000);
+    chassis.moveToPose(-10, -10, 180, 5000);
+
+    //chassis prepare to score on last side
+    chassis.moveToPose(-10, -200, 180, 9000);
+
+    //chassis sweep balls under
+
 }
 
 
@@ -353,7 +368,7 @@ void initialize() {
     chassis.calibrate(); // calibrate sensors
     chassis.setPose(0,0,0);
 
-    cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
     leftMotors.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
     rightMotors.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
     
@@ -405,9 +420,9 @@ void competition_initialize() {}
  */
 void autonomous() {
     // PIDTune();
-    FarSideAuton(); //this is the one that scores in the net, the 5 ball
+    // FarSideAuton(); //this is the one that scores in the net, the 5 ball
     // CloseSideAuton(); //this is the one that doesn't score, the winpoint.
-    // SkillsAuton();
+    SkillsAuton();
 }
 
 /**
